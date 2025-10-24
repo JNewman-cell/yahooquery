@@ -328,3 +328,59 @@ class _YahooFinance:
         except TypeError:
             data = json
         return data
+
+    def _normalize_quote_summary_response(self, data, module_name="quoteSummary"):
+        """
+        Normalize quoteSummary response to ensure consistent structure across all modules.
+        
+        Many quoteSummary endpoints can return either:
+        1. A dictionary with nested module data (normal case)
+        2. A string error message when no data is found (error case)
+        
+        This method ensures that error cases return a consistent structure
+        instead of a plain string, making it easier for consumers to handle
+        the response predictably across all quoteSummary-based properties.
+        
+        Parameters
+        ----------
+        data : dict
+            Raw response from _quote_summary
+        module_name : str, optional
+            Name of the module being normalized (for logging/debugging)
+            
+        Returns
+        -------
+        dict
+            Normalized response where each symbol maps to either:
+            - A dict with module data (success case)
+            - A dict with error information (error case):
+              {
+                "error": {
+                    "code": 404,
+                    "type": "NotFoundError",
+                    "message": "No fundamentals data found for symbol: EAI",
+                    "symbol": "EAI"
+                }
+              }
+        """
+        if not isinstance(data, dict):
+            return data
+            
+        normalized_data = {}
+        for symbol, module_data in data.items():
+            
+            if isinstance(module_data, str):
+                # Convert string error messages to a consistent error structure
+                normalized_data[symbol] = {
+                    "error": {
+                        "code": 404,
+                        "type": "NotFoundError",
+                        "message": module_data,
+                        "symbol": symbol
+                    }
+                }
+            else:
+                # Keep successful responses as-is
+                normalized_data[symbol] = module_data
+                
+        return normalized_data

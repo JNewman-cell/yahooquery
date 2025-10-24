@@ -208,7 +208,8 @@ class Ticker(_YahooFinance):
         dict
             assetProfile module data
         """
-        return self._quote_summary(["assetProfile"])
+        data = self._quote_summary(["assetProfile"])
+        return self._normalize_quote_summary_response(data, "asset_profile")
 
     @property
     def calendar_events(self):
@@ -222,7 +223,8 @@ class Ticker(_YahooFinance):
         dict
             calendarEvents module data
         """
-        return self._quote_summary(["calendarEvents"])
+        data = self._quote_summary(["calendarEvents"])
+        return self._normalize_quote_summary_response(data, "calendar_events")
 
     @property
     def earnings(self):
@@ -235,7 +237,8 @@ class Ticker(_YahooFinance):
         dict
             earnings module data
         """
-        return self._quote_summary(["earnings"])
+        data = self._quote_summary(["earnings"])
+        return self._normalize_quote_summary_response(data, "earnings")
 
     @property
     def earnings_trend(self):
@@ -249,7 +252,8 @@ class Ticker(_YahooFinance):
         dict
             earningsTrend module data
         """
-        return self._quote_summary(["earningsTrend"])
+        data = self._quote_summary(["earningsTrend"])
+        return self._normalize_quote_summary_response(data, "earnings_trend")
 
     @property
     def esg_scores(self):
@@ -263,7 +267,8 @@ class Ticker(_YahooFinance):
         dict
             esgScores module data
         """
-        return self._quote_summary(["esgScores"])
+        data = self._quote_summary(["esgScores"])
+        return self._normalize_quote_summary_response(data, "esg_scores")
 
     @property
     def financial_data(self):
@@ -276,7 +281,8 @@ class Ticker(_YahooFinance):
         dict
             financialData module data
         """
-        return self._quote_summary(["financialData"])
+        data = self._quote_summary(["financialData"])
+        return self._normalize_quote_summary_response(data, "financial_data")
 
     def news(self, count=25, start=None):
         """News articles related to given symbol(s)
@@ -320,7 +326,8 @@ class Ticker(_YahooFinance):
         dict
             indexTrend module data
         """
-        return self._quote_summary(["indexTrend"])
+        data = self._quote_summary(["indexTrend"])
+        return self._normalize_quote_summary_response(data, "index_trend")
 
     @property
     def industry_trend(self):
@@ -333,7 +340,8 @@ class Ticker(_YahooFinance):
         dict
             industryTrend module data
         """
-        return self._quote_summary(["industryTrend"])
+        data = self._quote_summary(["industryTrend"])
+        return self._normalize_quote_summary_response(data, "industry_trend")
 
     @property
     def key_stats(self):
@@ -346,7 +354,8 @@ class Ticker(_YahooFinance):
         dict
             defaultKeyStatistics module data
         """
-        return self._quote_summary(["defaultKeyStatistics"])
+        data = self._quote_summary(["defaultKeyStatistics"])
+        return self._normalize_quote_summary_response(data, "key_stats")
 
     @property
     def major_holders(self):
@@ -360,7 +369,8 @@ class Ticker(_YahooFinance):
         dict
             majorHoldersBreakdown module data
         """
-        return self._quote_summary(["majorHoldersBreakdown"])
+        data = self._quote_summary(["majorHoldersBreakdown"])
+        return self._normalize_quote_summary_response(data, "major_holders")
 
     @property
     def page_views(self):
@@ -373,7 +383,8 @@ class Ticker(_YahooFinance):
         dict
             pageViews module data
         """
-        return self._quote_summary(["pageViews"])
+        data = self._quote_summary(["pageViews"])
+        return self._normalize_quote_summary_response(data, "page_views")
 
     @property
     def price(self):
@@ -387,7 +398,8 @@ class Ticker(_YahooFinance):
         dict
             price module data
         """
-        return self._quote_summary(["price"])
+        data = self._quote_summary(["price"])
+        return self._normalize_quote_summary_response(data, "price")
 
     @property
     def quote_type(self):
@@ -446,7 +458,8 @@ class Ticker(_YahooFinance):
         dict
             netSharePurchaseActivity module data
         """
-        return self._quote_summary(["netSharePurchaseActivity"])
+        data = self._quote_summary(["netSharePurchaseActivity"])
+        return self._normalize_quote_summary_response(data, "share_purchase_activity")
 
     @property
     def summary_detail(self):
@@ -459,7 +472,8 @@ class Ticker(_YahooFinance):
         dict
             summaryDetail module data
         """
-        return self._quote_summary(["summaryDetail"])
+        data = self._quote_summary(["summaryDetail"])
+        return self._normalize_quote_summary_response(data, "summary_detail")
 
     @property
     def summary_profile(self):
@@ -472,7 +486,8 @@ class Ticker(_YahooFinance):
         dict
             summaryProfile module data
         """
-        return self._quote_summary(["summaryProfile"])
+        data = self._quote_summary(["summaryProfile"])
+        return self._normalize_quote_summary_response(data, "summary_profile")
 
     @property
     def technical_insights(self):
