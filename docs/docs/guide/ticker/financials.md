@@ -125,6 +125,20 @@
     | aapl     | 2020-07-29 00:00:00 | TTM          |       1.6632e+12  |                      nan      |                      nan       |          25.1256 |   1.64774e+12 |  21.0104  |   29.7232 |     2.0905 |   6.37702 |
     | aapl     | 2020-07-30 00:00:00 | TTM          |     nan           |                       20.2772 |                        6.2064  |         nan      | nan           | nan       |  nan      |   nan      | nan       |
 
+### **current_valuation_measures**
+
+=== "Details"
+
+    - *Description*:  Retrieves a JSON-serializable mapping of symbol to the most recent TTM valuation metrics.
+    - *Return*:  `dict`
+
+=== "Example"
+
+    ```python
+    aapl = Ticker('aapl')
+    aapl.current_valuation_measures()
+    ```
+
 
 ## Multiple
 
