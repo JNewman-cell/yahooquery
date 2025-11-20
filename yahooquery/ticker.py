@@ -195,7 +195,8 @@ class Ticker(_YahooFinance):
                 One of {} is not a valid value.  Valid values are {}.
             """.format(", ".join(modules), ", ".join(all_modules))
             )
-        return self._quote_summary(modules)
+        data = self._quote_summary(modules)
+        return self._normalize_quote_summary_response(data, "quoteSummary")
 
     @property
     def asset_profile(self):
