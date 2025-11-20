@@ -691,6 +691,56 @@ class Ticker(_YahooFinance):
         return self._financials("valuation", frequency, trailing=trailing)
 
 
+    def current_valuation_measures(self, frequency="q"):
+        """Current Valuation Measures
+
+        Returns a JSON-serializable dict of the most recent Trailing Twelve Months
+        (TTM) valuation metrics for each symbol. If TTM is not available for a
+        symbol, falls back to the most recent date.
+
+        Parameters
+        ----------
+        frequency: str, default 'q'
+            Specify either annual or quarterly.  Value should be 'a' or 'q'.
+
+        Returns
+        -------
+        dict | str
+            JSON-serializable dict keyed by symbol mapping to valuation measure
+            fields for the most recent TTM period. If the underlying API returns
+            an error string or dict, that value is returned directly.
+        """
+        # Retrieve valuation measures with trailing enabled to ensure TTM rows
+        df = self.valuation_measures(frequency, trailing=True)
+        # If _financials returned an error message or nested dict, just return it
+        if isinstance(df, (str, dict)):
+            return df
+        try:
+            # Ensure `periodType` and `asOfDate` exist
+            if "periodType" not in df.columns or "asOfDate" not in df.columns:
+                return {}
+            # Normalize periodType to upper case and filter for TTM rows
+            ttm_df = df[df["periodType"].astype(str).str.upper() == "TTM"]
+            if ttm_df.empty:
+                # Fallback to most recent 'asOfDate' per symbol
+                latest = df.sort_values("asOfDate").groupby(df.index).last()
+            else:
+                latest = ttm_df.sort_values("asOfDate").groupby(ttm_df.index).last()
+
+            # Convert to JSON-serializable dict and format asOfDate
+            out = {}
+            records = latest.to_dict(orient="index")
+            for symbol, rec in records.items():
+                if isinstance(rec.get("asOfDate"), (pd.Timestamp,)):
+                    rec["asOfDate"] = rec["asOfDate"].isoformat()
+                out[symbol] = rec
+            return out
+        except Exception:
+            # If anything unexpected happens, return an empty dict rather than
+            # raising, to keep API behavior consistent with other endpoints.
+            return {}
+
+
     def balance_sheet(self, frequency="a"):
         """Balance Sheet
 

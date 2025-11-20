@@ -29,6 +29,7 @@ FINANCIALS = [
     "all_financial_data",
     "p_all_financial_data",
     "p_valuation_measures",
+    "current_valuation_measures",
 ]
 
 SEPERATE_ENDPOINTS = [
@@ -185,6 +186,17 @@ def test_history_bad_args(ticker, period, interval):
 
 
 def test_adj_ohlc(ticker):
+
+    def test_current_valuation_measures(ticker):
+        res = ticker.current_valuation_measures()
+        assert res is not None
+        if isinstance(res, str):
+            assert "unavailable" in res.lower()
+        else:
+            assert isinstance(res, dict)
+            for sym, metrics in res.items():
+                # Ensure there is an asOfDate for the current selected entry
+                assert "asOfDate" in metrics
     assert ticker.history(period="max", adj_ohlc=True) is not None
 
 
