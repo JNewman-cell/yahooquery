@@ -573,7 +573,7 @@ class Ticker(_YahooFinance):
             df = pd.DataFrame.from_records(data[data_type])
             if period_type:
                 df["reportedValue"] = df["reportedValue"].apply(
-                    lambda x: x.get("raw") if isinstance(x, dict) else x
+                    lambda x: self._extract_reported_value(x)
                 )
                 df["dataType"] = data_type
                 df["symbol"] = symbol
@@ -586,6 +586,22 @@ class Ticker(_YahooFinance):
         except KeyError:
             # No data is available for that type
             pass
+
+    def _extract_reported_value(self, reported_value):
+        """Extract the raw value from reportedValue, handling nested structures"""
+        if isinstance(reported_value, dict):
+            raw_value = reported_value.get("raw")
+            if isinstance(raw_value, dict):
+                # Handle nested raw structure (e.g., for MarketCap, EnterpriseValue)
+                raw_value = raw_value.get("parsedValue", raw_value.get("source"))
+                if isinstance(raw_value, str):
+                    try:
+                        return float(raw_value)
+                    except (ValueError, TypeError):
+                        pass
+            return raw_value
+        return reported_value
+
 
     def all_financial_data(self, frequency="a"):
         """
@@ -651,17 +667,29 @@ class Ticker(_YahooFinance):
             trailing=False,
         )
 
-    @property
-    def valuation_measures(self):
+    def valuation_measures(self, frequency="q", trailing=True):
         """Valuation Measures
-        Retrieves valuation measures for most recent four quarters as well
-        as the most recent date
+
+        Retrieves valuation measures for most recent quarters or years
 
         Notes
         -----
         Only quarterly data is available for non-premium subscribers
+
+        Parameters
+        ----------
+        frequency: str, default 'q', optional
+            Specify either annual or quarterly.  Value should be 'a' or 'q'.
+        trailing: bool, default True, optional
+            Specify whether or not you'd like trailing twelve month (TTM)
+            data returned
+
+        Returns
+        -------
+        pandas.DataFrame
         """
-        return self._financials("valuation", "q")
+        return self._financials("valuation", frequency, trailing=trailing)
+
 
     def balance_sheet(self, frequency="a"):
         """Balance Sheet
@@ -1186,12 +1214,26 @@ class Ticker(_YahooFinance):
     def p_technical_events(self):
         return self._get_data("technical_events")
 
-    def p_valuation_measures(self, frequency="q"):
+    def p_valuation_measures(self, frequency="q", trailing=True):
         """Valuation Measures
+
         Retrieves valuation measures for all available dates for given
         symbol(s)
+
+        Parameters
+        ----------
+        frequency: str, default 'q', optional
+            Specify either annual or quarterly.  Value should be 'a' or 'q'.
+        trailing: bool, default True, optional
+            Specify whether or not you'd like trailing twelve month (TTM)
+            data returned
+
+        Returns
+        -------
+        pandas.DataFrame
         """
-        return self._financials("valuation", frequency, premium=True)
+        return self._financials("valuation", frequency, premium=True, trailing=trailing)
+
 
     @property
     def p_value_analyzer(self):

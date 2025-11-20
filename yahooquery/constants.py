@@ -587,15 +587,15 @@ FUNDAMENTALS_OPTIONS = {
         "UnrealizedGainLossOnInvestmentSecurities",
     ],
     "valuation": [
-        "ForwardPeRatio",
-        "PsRatio",
-        "PbRatio",
-        "EnterprisesValueEBITDARatio",
-        "EnterprisesValueRevenueRatio",
-        "PeRatio",
         "MarketCap",
         "EnterpriseValue",
+        "PeRatio",
+        "ForwardPeRatio",
         "PegRatio",
+        "PsRatio",
+        "PbRatio",
+        "EnterprisesValueRevenueRatio",
+        "EnterprisesValueEBITDARatio",
     ],
 }
 
