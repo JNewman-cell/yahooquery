@@ -1,5 +1,13 @@
 # Release Notes
 
+2.4.2
+-----
+## Add
+- Added a new function and minor improvements (see PR/commit for details)
+
+## Fix
+- Minor bug and doc updates related to the new function
+
 2.4.0
 -----
 ## Update
