@@ -200,6 +200,47 @@ def test_adj_ohlc(ticker):
     assert ticker.history(period="max", adj_ohlc=True) is not None
 
 
+def test_current_valuation_measures_batch_ttm(monkeypatch):
+    """Ensure batch current_valuation_measures returns most recent TTM per symbol"""
+    # Create a Ticker with two symbols
+    ticker = Ticker("AAPL MSFT")
+    # Craft a MultiIndex DataFrame to mimic the API response
+    symbols = ["AAPL", "MSFT"]
+    dates = pd.to_datetime(["2020-01-01", "2020-02-01", "2020-03-01"])
+    idx = pd.MultiIndex.from_product([symbols, dates], names=["symbol", "date"])
+    df = pd.DataFrame(index=idx)
+    # Make TTM present for the middle date for each symbol
+    df["periodType"] = "TTM"
+    df["asOfDate"] = df.index.get_level_values(1)
+    df["value"] = range(len(df))
+
+    # Monkeypatch valuation_measures to return our DataFrame
+    monkeypatch.setattr(ticker, "valuation_measures", lambda frequency, trailing=True: df)
+    res = ticker.current_valuation_measures()
+    # Expect keys to be the two symbols and values have asOfDate equal to most recent TTM per symbol
+    assert set(res.keys()) == set(symbols)
+    for symbol in symbols:
+        assert res[symbol]["asOfDate"] == pd.Timestamp("2020-03-01").isoformat()
+
+
+def test_current_valuation_measures_batch_no_ttm(monkeypatch):
+    """Ensure fallback to most recent asOfDate per symbol when TTM is absent"""
+    ticker = Ticker("AAPL MSFT")
+    symbols = ["AAPL", "MSFT"]
+    dates = pd.to_datetime(["2020-01-01", "2020-02-01", "2020-03-01"])
+    idx = pd.MultiIndex.from_product([symbols, dates], names=["symbol", "date"])
+    df = pd.DataFrame(index=idx)
+    # No TTM rows
+    df["periodType"] = "MRQ"
+    df["asOfDate"] = df.index.get_level_values(1)
+    df["value"] = range(len(df))
+    monkeypatch.setattr(ticker, "valuation_measures", lambda frequency, trailing=True: df)
+    res = ticker.current_valuation_measures()
+    assert set(res.keys()) == set(symbols)
+    for symbol in symbols:
+        assert res[symbol]["asOfDate"] == pd.Timestamp("2020-03-01").isoformat()
+
+
 class TestHistoryDataframe:
     """Tests for `utils.history_dataframe` and dependencies."""
 

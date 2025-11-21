@@ -721,11 +721,24 @@ class Ticker(_YahooFinance):
                 return {}
             # Normalize periodType to upper case and filter for TTM rows
             ttm_df = df[df["periodType"].astype(str).str.upper() == "TTM"]
+
+            # Determine grouping key — for batch calls the index is a MultiIndex
+            # where the first level is the symbol. We want to group by symbol
+            # to select the most recent record per symbol. For single-ticker
+            # calls it will be a single-level index (dates) and grouping by
+            # the index itself is sufficient.
+            def _group_key(dfobj):
+                if isinstance(dfobj.index, pd.MultiIndex):
+                    # groupby with the first level (symbol)
+                    return dfobj.index.get_level_values(0)
+                # fallback to group by the index (single-ticker case)
+                return dfobj.index
+
             if ttm_df.empty:
                 # Fallback to most recent 'asOfDate' per symbol
-                latest = df.sort_values("asOfDate").groupby(df.index).last()
+                latest = df.sort_values("asOfDate").groupby(_group_key(df)).last()
             else:
-                latest = ttm_df.sort_values("asOfDate").groupby(ttm_df.index).last()
+                latest = ttm_df.sort_values("asOfDate").groupby(_group_key(ttm_df)).last()
 
             # Convert to JSON-serializable dict and format asOfDate
             out = {}
