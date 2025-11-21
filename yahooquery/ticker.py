@@ -736,9 +736,11 @@ class Ticker(_YahooFinance):
 
             if ttm_df.empty:
                 # Fallback to most recent 'asOfDate' per symbol
-                latest = df.sort_values("asOfDate").groupby(_group_key(df)).last()
+                sorted_df = df.sort_values("asOfDate")
+                latest = sorted_df.groupby(_group_key(sorted_df)).last()
             else:
-                latest = ttm_df.sort_values("asOfDate").groupby(_group_key(ttm_df)).last()
+                sorted_ttm = ttm_df.sort_values("asOfDate")
+                latest = sorted_ttm.groupby(_group_key(sorted_ttm)).last()
 
             # Convert to JSON-serializable dict and format asOfDate
             out = {}
