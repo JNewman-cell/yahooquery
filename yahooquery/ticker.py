@@ -303,17 +303,66 @@ class Ticker(_YahooFinance):
         -----
         It's recommended to use only one symbol for this property as the data
         returned does not distinguish between what symbol the news stories
-        belong to
+        belong to.
+        
+        The start parameter is no longer supported by the Yahoo Finance API.
 
         Returns
         -------
         dict
         """
-        if start:
-            start = convert_to_timestamp(start)
-        return self._chunk_symbols(
-            "news", params={"count": count, "start": start}, list_result=True
-        )
+        config = CONFIG["news"]
+        results = {}
+        
+        for symbol in self._symbols:
+            # Build query parameters with defaults from config
+            params = {
+                "location": self._country_params.get("region", "US"),
+                "queryRef": "newsAll",
+                "serviceKey": "ncp_fin",
+                "listName": f"{symbol}-news",
+                "lang": self._country_params.get("lang", "en-US"),
+                "region": self._country_params.get("region", "US"),
+            }
+            
+            # Add default query params (crumb, etc.)
+            params.update(self.default_query_params)
+            
+            # POST body
+            payload = {
+                "serviceConfig": {
+                    "count": count or 25,
+                    "s": [symbol]
+                },
+                "session": {
+                    "lang": self._country_params.get("lang", "en-US"),
+                    "region": self._country_params.get("region", "US"),
+                }
+            }
+            
+            # Make POST request using session
+            response = self.session.post(
+                url=config["path"],
+                params=params,
+                json=payload
+            )
+            
+            try:
+                json_data = response.json()
+                # Extract news items from the API response
+                if "data" in json_data and "tickerStream" in json_data["data"]:
+                    stream = json_data["data"]["tickerStream"].get("stream", [])
+                    results[symbol] = [item["content"] for item in stream if "content" in item]
+                else:
+                    results[symbol] = json_data
+            except Exception:
+                try:
+                    results[symbol] = f"Error: {response.status_code} - {response.text[:100]}"
+                except Exception:
+                    results[symbol] = "Error: Unable to retrieve news"
+        
+        return results
+
 
     @property
     def index_trend(self):
